@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Controle de Estacas - Torre</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #e9ecef;
+            margin: 0;
+            padding: 16px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin: 0 0 5px 0;
+            color: #0b5e7e;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin: 0 0 16px 0;
+            color: #2c3e50;
+            border-left: 5px solid #0b5e7e;
+            padding-left: 12px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 14px;
+            font-size: 1rem;
+            background: white;
+            font-family: inherit;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0b5e7e;
+            box-shadow: 0 0 0 3px rgba(11,94,126,0.1);
+        }
+        /* Melhorar teclado numérico no celular */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.5;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #0b5e7e;
+            color: white;
+        }
+        .btn-primary:active {
+            background: #094a63;
+            transform: scale(0.98);
+        }
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+        .btn-danger {
+            background: #c62828;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .registro-item {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 5px solid #0b5e7e;
+        }
+        .registro-header {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .badge-torre {
+            background: #0b5e7e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .badge-estaca {
+            background: #2e7d32;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .badge-bt {
+            background: #f57c00;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .detalhes {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        .btn-pequeno {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            width: auto;
+            display: inline-block;
+            margin-right: 8px;
+            border-radius: 30px;
+        }
+        .resumo-card {
+            background: #e3f2fd;
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .resumo-item {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .flex-btns .btn {
+            margin-top: 0;
+        }
+        @media (max-width: 500px) {
+            body {
+                padding: 10px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .registro-header {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🏗️ Controle de Estacas</h1>
+            <p style="color: #5f6368;">Registre por Torre, Estaca e BT</p>
+        </div>
+
+        <!-- Formulário -->
+        <div class="card">
+            <h2>➕ Novo Lançamento</h2>
+            <div class="form-group">
+                <label>🗼 Torre</label>
+                <select id="torre">
+                    <option value="1">Torre 1</option>
+                    <option value="2" selected>Torre 2</option>
+                    <option value="3">Torre 3</option>
+                    <option value="4">Torre 4</option>
+                    <option value="5">Torre 5</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📍 Estaca (ex: P148C)</label>
+                <input type="text" id="estaca" placeholder="Ex: P148C" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label>📏 Diâmetro (cm)</label>
+                <input type="number" id="diametro" placeholder="100" step="1" value="100" required>
+            </div>
+            <div class="form-group">
+                <label>⛏️ Perfurou (metros)</label>
+                <input type="number" id="perfuracao" placeholder="Ex: 7.43" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>🧱 Concretou (m³)</label>
+                <input type="number" id="concreto" placeholder="Ex: 7.50" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>🔢 Número do BT</label>
+                <input type="text" id="bt" placeholder="Ex: 5135" required>
+            </div>
+            <button class="btn btn-primary" id="btnAdicionar">✅ Adicionar Registro</button>
+        </div>
+
+        <!-- Lista de registros -->
+        <div class="card">
+            <h2>📋 Registros</h2>
+            <div id="listaRegistros">
+                <p style="text-align: center; color: #888;">Nenhum registro ainda.</p>
+            </div>
+            <div id="resumoGeral" style="display: none;">
+                <div class="resumo-card">
+                    <strong>📊 Resumo por Estaca:</strong>
+                    <div id="resumoEstacas"></div>
+                    <hr>
+                    <p><strong>🧮 Total geral de concreto:</strong> <span id="totalGeral">0</span> m³</p>
+                </div>
+            </div>
+            <div class="flex-btns">
+                <button class="btn btn-success" id="btnPDF">📄 Gerar PDF</button>
+                <button class="btn btn-danger" id="btnLimpar">🗑️ Limpar Tudo</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💡 Instruções</h2>
+            <p style="font-size: 0.85rem;">
+                • Se a mesma estaca receber mais de um BT, registre novamente com a mesma estaca e os novos dados.<br>
+                • O sistema soma automaticamente o concreto e mostra o histórico.<br>
+                • Clique em "Gerar PDF" para criar relatório para a engenharia.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Armazenamento
+        let registros = [];
+
+        // Carregar do localStorage
+        function carregar() {
+            const dados = localStorage.getItem('controleEstacas');
+            if (dados) {
+                registros = JSON.parse(dados);
+                atualizarTela();
+            }
+        }
+
+        function salvar() {
+            localStorage.setItem('controleEstacas', JSON.stringify(registros));
+        }
+
+        // Formatar número para exibição (sem problemas de decimais)
+        function formatarNumero(valor) {
+            return parseFloat(valor).toFixed(2).replace('.', ',');
+        }
+
+        function formatarNumeroPonto(valor) {
+            return parseFloat(valor).toFixed(2);
+        }
+
+        // Adicionar registro
+        function adicionarRegistro() {
+            const torre = document.getElementById('torre').value;
+            const estaca = document.getElementById('estaca').value.trim().toUpperCase();
+            const diametro = parseFloat(document.getElementById('diametro').value);
+            const perfuracao = parseFloat(document.getElementById('perfuracao').value);
+            const concreto = parseFloat(document.getElementById('concreto').value);
+            const bt = document.getElementById('bt').value.trim();
+
+            if (!estaca || isNaN(diametro) || isNaN(perfuracao) || isNaN(concreto) || !bt) {
+                alert('⚠️ Preencha todos os campos corretamente!');
+                return;
+            }
+
+            if (diametro <= 0 || perfuracao <= 0 || concreto <= 0) {
+                alert('⚠️ Valores devem ser maiores que zero!');
+                return;
+            }
+
+            const novo = {
+                id: Date.now(),
+                torre: torre,
+                estaca: estaca,
+                diametro: diametro,
+                perfuracao: perfuracao,
+                concreto: concreto,
+                bt: bt,
+                data: new Date().toLocaleString('pt-BR')
+            };
+
+            registros.push(novo);
+            salvar();
+            atualizarTela();
+
+            // Limpar campos, mas manter torre e diâmetro (opcional)
+            document.getElementById('estaca').value = '';
+            document.getElementById('perfuracao').value = '';
+            document.getElementById('concreto').value = '';
+            document.getElementById('bt').value = '';
+            document.getElementById('estaca').focus();
+        }
+
+        function removerRegistro(id) {
+            if (confirm('Remover este registro?')) {
+                registros = registros.filter(r => r.id !== id);
+                salvar();
+                atualizarTela();
+            }
+        }
+
+        function atualizarTela() {
+            const container = document.getElementById('listaRegistros');
+            const resumoDiv = document.getElementById('resumoGeral');
+
+            if (registros.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #888;">Nenhum registro ainda.</p>';
+                resumoDiv.style.display = 'none';
+                return;
+            }
+
+            resumoDiv.style.display = 'block';
+
+            // Ordenar por torre, depois estaca, depois data
+            registros.sort((a,b) => {
+                if (a.torre !== b.torre) return a.torre - b.torre;
+                if (a.estaca !== b.estaca) return a.estaca.localeCompare(b.estaca);
+                return a.id - b.id;
+            });
+
+            // Listar registros
+            let listaHtml = '';
+            for (let reg of registros) {
+                listaHtml += `
+                    <div class="registro-item">
+                        <div class="registro-header">
+                            <span class="badge-torre">Torre ${reg.torre}</span>
+                            <span class="badge-estaca">${reg.estaca}</span>
+                            <span class="badge-bt">BT ${reg.bt}</span>
+                            <span style="font-size:0.7rem; color:#6c757d;">${reg.data}</span>
+                        </div>
+                        <div class="detalhes">
+                            📏 ∅ ${reg.diametro} cm | ⛏️ Perfurou: ${formatarNumero(reg.perfuracao)} m | 🧱 Concreto: ${formatarNumero(reg.concreto)} m³
+                        </div>
+                        <button class="btn-pequeno btn-danger" onclick="removerRegistro(${reg.id})">✖ Remover</button>
+                    </div>
+                `;
+            }
+            container.innerHTML = listaHtml;
+
+            // Calcular resumo por estaca (considerando torre + estaca)
+            const resumo = {};
+            let totalGeral = 0;
+
+            for (let reg of registros) {
+                const chave = `${reg.torre}|${reg.estaca}`;
+                if (!resumo[chave]) {
+                    resumo[chave] = {
+                        torre: reg.torre,
+                        estaca: reg.estaca,
+                        diametro: reg.diametro,
+                        concretoTotal: 0,
+                        perfTotal: 0,
+                        bts: [],
+                        registros: []
+                    };
+                }
+                resumo[chave].concretoTotal += reg.concreto;
+                resumo[chave].perfTotal += reg.perfuracao;
+                resumo[chave].bts.push(reg.bt);
+                resumo[chave].registros.push(reg);
+                totalGeral += reg.concreto;
+            }
+
+            let resumoHtml = '';
+            for (let chave in resumo) {
+                const item = resumo[chave];
+                const btsUnicos = [...new Set(item.bts)].sort((a,b) => a - b);
+                // Volume teórico aproximado (π * raio² * profundidade)
+                const raioM = (item.diametro / 100) / 2;
+                const volumeTeorico = (Math.PI * Math.pow(raioM, 2) * item.perfTotal).toFixed(2);
+                resumoHtml += `
+                    <div class="resumo-item">
+                        <strong>🏗️ Torre ${item.torre} - Estaca ${item.estaca}</strong><br>
+                        ∅ ${item.diametro} cm | Perfuração total: ${formatarNumero(item.perfTotal)} m<br>
+                        Concreto total: ${formatarNumero(item.concretoTotal)} m³ | Volume teórico: ${volumeTeorico.replace('.',',')} m³<br>
+                        BTs utilizados: ${btsUnicos.join(' → ')}
+                    </div>
+                `;
+            }
+            document.getElementById('resumoEstacas').innerHTML = resumoHtml;
+            document.getElementById('totalGeral').innerText = formatarNumero(totalGeral);
+        }
+
+        // Gerar PDF
+        async function gerarPDF() {
+            if (registros.length === 0) {
+                alert('Nenhum registro para gerar relatório.');
+                return;
+            }
+
+            // Preparar conteúdo para o PDF
+            const divRelatorio = document.createElement('div');
+            divRelatorio.style.padding = '20px';
+            divRelatorio.style.fontFamily = 'Arial, sans-serif';
+            divRelatorio.style.backgroundColor = 'white';
+            divRelatorio.style.width = '800px';
+
+            // Agrupar dados para o relatório
+            const grupos = {};
+            for (let reg of registros) {
+                const chave = `${reg.torre}|${reg.estaca}`;
+                if (!grupos[chave]) {
+                    grupos[chave] = {
+                        torre: reg.torre,
+                        estaca: reg.estaca,
+                        diametro: reg.diametro,
+                        perfTotal: 0,
+                        concretoTotal: 0,
+                        bts: [],
+                        detalhes: []
+                    };
+                }
+                grupos[chave].perfTotal += reg.perfuracao;
+                grupos[chave].concretoTotal += reg.concreto;
+                grupos[chave].bts.push(reg.bt);
+                grupos[chave].detalhes.push(reg);
+            }
+
+            let html = `
+                <h1 style="color: #0b5e7e;">RELATÓRIO DE CONCRETAGEM</h1>
+                <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                <hr>
+            `;
+
+            let totalGeralRel = 0;
+            for (let chave in grupos) {
+                const g = grupos[chave];
+                totalGeralRel += g.concretoTotal;
+                const btsOrdenados = [...new Set(g.bts)].sort((a,b) => a - b);
+                const raioM = (g.diametro / 100) / 2;
+                const volumeTeorico = (Math.PI * Math.pow(raioM, 2) * g.perfTotal).toFixed(2);
+                html += `
+                    <div style="margin-bottom: 25px; border: 1px solid #ccc; border-radius: 12px; padding: 15px;">
+                        <h2 style="margin:0 0 10px 0;">Torre ${g.torre} - Estaca ${g.estaca}</h2>
+                        <p><strong>Diâmetro:</strong> ${g.diametro} cm</p>
+                        <p><strong>Perfuração total:</strong> ${g.perfTotal.toFixed(2)} m</p>
+                        <p><strong>Concreto total aplicado:</strong> ${g.concretoTotal.toFixed(2)} m³</p>
+                        <p><strong>Volume teórico:</strong> ${volumeTeorico} m³</p>
+                        <p><strong>BTs utilizados:</strong> ${btsOrdenados.join(' → ')}</p>
+                        <h3>Detalhamento por BT:</h3>
+                        <table style="width:100%; border-collapse: collapse;">
+                            <tr style="background:#f0f0f0;">
+                                <th style="border:1px solid #ddd; padding:8px; text-align:left;">BT</th>
+                                <th style="border:1px solid #ddd; padding:8px; text-align:left;">Perfuração (m)</th>
+                                <th style="border:1px solid #ddd; padding:8px; text-align:left;">Concreto (m³)</th>
+                                <th style="border:1px solid #ddd; padding:8px; text-align:left;">Data</th>
+                            </tr>
+                `;
+                for (let det of g.detalhes) {
+                    html += `
+                        <tr>
+                            <td style="border:1px solid #ddd; padding:8px;">BT ${det.bt}</td>
+                            <td style="border:1px solid #ddd; padding:8px;">${det.perfuracao.toFixed(2)}</td>
+                            <td style="border:1px solid #ddd; padding:8px;">${det.concreto.toFixed(2)}</td>
+                            <td style="border:1px solid #ddd; padding:8px;">${det.data}</td>
+                        </tr>
+                    `;
+                }
+                html += `</table></div>`;
+            }
+            html += `<hr><h2>📊 TOTAL GERAL DE CONCRETO: ${totalGeralRel.toFixed(2)} m³</h2>`;
+            html += `<p style="font-size:10px; color:#888;">Documento gerado pelo sistema de controle de estacas.</p>`;
+
+            divRelatorio.innerHTML = html;
+            document.body.appendChild(divRelatorio);
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const canvas = await html2canvas(divRelatorio, {
+                    scale: 2,
+                    backgroundColor: '#ffffff'
+                });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190;
+                const pageHeight = 277;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`Relatorio_Estacas_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`);
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao gerar PDF. Tente novamente.');
+            }
+
+            document.body.removeChild(divRelatorio);
+        }
+
+        function limparTudo() {
+            if (confirm('⚠️ Isso apagará todos os registros. Confirmar?')) {
+                registros = [];
+                salvar();
+                atualizarTela();
+            }
+        }
+
+        // Eventos
+        document.getElementById('btnAdicionar').addEventListener('click', adicionarRegistro);
+        document.getElementById('btnPDF').addEventListener('click', gerarPDF);
+        document.getElementById('btnLimpar').addEventListener('click', limparTudo);
+
+        // Permitir Enter no formulário
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    adicionarRegistro();
+                }
+            });
+        });
+
+        carregar();
+    </script>
+</body>
+</html>
